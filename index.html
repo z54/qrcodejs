@@ -25,6 +25,15 @@ body {
     width: 90%;
     max-width: 1200px;
 }
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .input-area, .output-area {
+        width: 100%;
+        min-width: auto;
+    }
+}
 .input-area {
     flex: 1;
     min-width: 300px;

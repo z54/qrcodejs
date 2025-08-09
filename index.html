@@ -40,6 +40,52 @@ input:focus {
     padding: 1rem;
     background: white;
 }
+.mode-switch {
+    margin-bottom: 1rem;
+}
+.mode-switch button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.mode-switch button:hover {
+    background: #45a049;
+}
+textarea {
+    width: 100%;
+    height: 200px;
+    padding: 0.8rem;
+    margin: 1rem 0;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: vertical;
+    display: none;
+}
+.multi-mode .input-single {
+    display: none;
+}
+.multi-mode textarea {
+    display: block;
+}
+.multi-mode .qrcodes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+}
+.qrcode-item {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.qrcode-item p {
+    margin: 5px 0;
+    word-break: break-all;
+}
 </style>
 <script src="jquery.min.js"></script>
 <script src="qrcode.js"></script>
@@ -47,8 +93,17 @@ input:focus {
 <body>
 <div class="container">
     <h1>二维码生成器</h1>
-    <input id="text" type="text" value="http://jindo.dev.naver.com/collie" placeholder="请输入文本或网址"/>
-    <div id="qrcode" style="width:200px; height:200px;"></div>
+    <div class="mode-switch">
+        <button id="switchMode">切换到批量模式</button>
+    </div>
+    <div class="input-single">
+        <input id="text" type="text" value="" placeholder="请输入文本或网址"/>
+        <div id="qrcode" style="width:200px; height:200px;"></div>
+    </div>
+    <div class="input-multi">
+        <textarea id="multiText" placeholder="请输入多个文本，每行一个"></textarea>
+        <div class="qrcodes-container"></div>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -63,11 +118,11 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 function makeCode() {
     var elText = document.getElementById("text");
     
-    if (!elText.value) {
-        alert("请输入文本内容");
-        elText.focus();
-        return;
-    }
+    // if (!elText.value) {
+    //     alert("请输入文本内容");
+    //     elText.focus();
+    //     return;
+    // }
     
     qrcode.clear();
     qrcode.makeCode(elText.value);
@@ -84,5 +139,42 @@ $("#text")
             makeCode();
         }
     });
+
+$("#switchMode").on("click", function() {
+    const container = $(".container");
+    if (container.hasClass("multi-mode")) {
+        container.removeClass("multi-mode");
+        $(this).text("切换到批量模式");
+    } else {
+        container.addClass("multi-mode");
+        $(this).text("切换到单个模式");
+    }
+});
+
+$("#multiText").on("input", function() {
+    const texts = $(this).val().split("\n").filter(text => text.trim());
+    const container = $(".qrcodes-container").empty();
+    
+    texts.forEach(text => {
+        const qrcodeItem = $("<div>").addClass("qrcode-item");
+        const qrcodeElement = $("<div>").css({
+            width: "200px",
+            height: "200px"
+        });
+        const textElement = $("<p>").text(text);
+        
+        qrcodeItem.append(textElement, qrcodeElement);
+        container.append(qrcodeItem);
+        
+        new QRCode(qrcodeElement[0], {
+            text: text,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
+});
 </script>
 </body>
